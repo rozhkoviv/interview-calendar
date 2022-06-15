@@ -38,7 +38,7 @@ const convertTime = (time: number) => {
   return `${time}:00`;
 }
 
-const haveDateEvent = (date: { time: number, date: string }) => localStorage.getItem(JSON.stringify(date));
+export const haveDateEvent = (date: { time: number, date: string }) => !!localStorage.getItem(JSON.stringify(date));
 
 export default function CalendarRow(props: { time: number}) {
 

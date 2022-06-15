@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components'
 import { useWeekHelper } from '../../helper/WeekHelper'
+import { haveDateEvent } from '../days/CalendarRow';
 
 const FooterContainer = styled.footer`
   display: flex;
@@ -38,7 +39,7 @@ export default function CalendarFooter () {
     }
   }
 
-  const getDeleteButton = useMemo(() => (selectedDay)?<FooterButton onClick={deleteDay}>Delete</FooterButton>:null, [selectedDay]);
+  const getDeleteButton = useMemo(() => (selectedDay && haveDateEvent({time: selectedDay.time, date: selectedDay.day.toDateString()}))?<FooterButton onClick={deleteDay}>Delete</FooterButton>:null, [selectedDay]);
 
   return(
     <FooterContainer>
