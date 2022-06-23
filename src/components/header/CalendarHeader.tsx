@@ -1,5 +1,7 @@
-import styled from 'styled-components'
-import { useWeekHelper } from '../../helper/WeekHelper'
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { reloadWeek, SelectedDay } from '../../storage/reducer';
 
 const Header = styled.header`
     display: flex;
@@ -47,7 +49,7 @@ const AddButton = styled.div`
 
 export default function CalendarHeader( props: { name: string } ) {
 
-  const weekHelper = useWeekHelper();
+  const dispatcher = useDispatch();
 
   const addEvent = () => {
     const eventTime = prompt('Enter event time:\nYYYY-MM-DD HH:mm:ss');
@@ -56,7 +58,7 @@ export default function CalendarHeader( props: { name: string } ) {
       const hours = date.getHours();
       const eventDate = { time: hours, date: date.toDateString() };
       localStorage.setItem(JSON.stringify(eventDate), 'true');
-      weekHelper.setWeek(weekHelper.getWeekStart());
+      dispatcher(reloadWeek());
     }
   }
 

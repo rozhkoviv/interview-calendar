@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { useWeekHelper } from '../../helper/WeekHelper'
+import { SelectedDay, setDay } from '../../storage/reducer'
 
 const THeader = styled.th`
   width: 2.3rem;
@@ -42,28 +44,26 @@ export const haveDateEvent = (date: { time: number, date: string }) => !!localSt
 
 export default function CalendarRow(props: { time: number}) {
 
-  const weekHelper = useWeekHelper();
+  const { week, day } = useSelector((state: {
+    day: SelectedDay | null;
+    week: Date[];
+  }) => state );
 
-  const [week, setWeek] = useState(weekHelper.getWeek());
-  const [selectedDay, setSelectedDay] = useState(weekHelper.getDay());
+  const dispatcher = useDispatch();
 
-  useEffect(() => weekHelper.subscribeWeek(setWeek), []);
-  useEffect(() => weekHelper.subscribeDay(setSelectedDay), []);
-  useEffect(() => weekHelper.setDay(null), [week]);
+  const renderDayWithInfo = (dayToRender: Date) => {
 
-  const renderDayWithInfo = (day: Date) => {
-
-    if (selectedDay !== null && selectedDay.day.toDateString() === day.toDateString() && selectedDay.time === props.time)
+    if (day !== null && day.day.toDateString() === dayToRender.toDateString() && day.time === props.time)
       return <TCellSelected />
 
     return(
-      (haveDateEvent({time: props.time, date: day.toDateString()}))?<TCellFilled onClick={() => weekHelper.setDay({ time: props.time, day })} />:<TCell onClick={() => weekHelper.setDay({ time: props.time, day })}/>
+      (haveDateEvent({time: props.time, date: dayToRender.toDateString()}))?<TCellFilled onClick={() => dispatcher(setDay({ time: props.time, day: dayToRender }))} />:<TCell onClick={() => dispatcher(setDay({ time: props.time, day: dayToRender }))}/>
     )
   }
 
-  const renderWeek = () => week.map(day => renderDayWithInfo(day));
+  const renderWeek = () => week.map(currentDay => renderDayWithInfo(currentDay));
 
-  const weekTimes = useMemo(renderWeek, [week, selectedDay]);
+  const weekTimes = useMemo(renderWeek, [week, day]);
   const time = useMemo(() => convertTime(props.time), [props.time]);
 
   return(

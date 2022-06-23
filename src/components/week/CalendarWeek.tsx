@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { AnyAction, CombinedState } from '@reduxjs/toolkit';
+import { Reducer, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useWeekHelper } from '../../helper/WeekHelper';
+import { nextWeek, prevWeek, SelectedDay } from '../../storage/reducer';
 import CalendarWeekDay from './CalendarWeekDay';
 
 const WeekContainer = styled.div`
@@ -92,20 +95,19 @@ const WeekSelectorArrowRight = styled(WeekSelectorArrowLeft)`
 
 export default function CalendarWeek() {
 
-  const weekHelper = useWeekHelper();
+  const week = useSelector((state: {
+    day: SelectedDay | null;
+    week: Date[];
+}) => state.week );
 
-  const [week, setWeek] = useState(weekHelper.getWeek());
-
-  useEffect(() => weekHelper.subscribeWeek(setWeek), []);
+  const dispatcher = useDispatch();
 
   const changeWeekForward = () => {
-    const weekStart = weekHelper.getWeekStart();
-    weekHelper.setWeek(new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7));
+    dispatcher(nextWeek());
   }
 
   const changeWeekBackward = () => {
-    const weekStart = weekHelper.getWeekStart();
-    weekHelper.setWeek(new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() - 7));
+    dispatcher(prevWeek());
   }
 
 
@@ -120,7 +122,7 @@ export default function CalendarWeek() {
   }
 
   const getMonth = () => {
-    switch(weekHelper.getWeekStart().getMonth()) {
+    switch(week[0].getMonth()) {
       case 0: return 'January';
       case 1: return 'February';
       case 2: return 'March';
@@ -147,7 +149,7 @@ export default function CalendarWeek() {
       </WeekList>
       <WeekSelector>
         <WeekSelectorArrowLeft onClick={changeWeekBackward} />
-          {currentMonth} {weekHelper.getWeekStart().getFullYear()}
+          {currentMonth} {week[0].getFullYear()}
         <WeekSelectorArrowRight onClick={changeWeekForward} />
       </WeekSelector>
     </WeekContainer>

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components'
-import { useWeekHelper } from '../../helper/WeekHelper'
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { currentWeek, reloadWeek, SelectedDay, setDay } from '../../storage/reducer';
 import { haveDateEvent } from '../days/CalendarRow';
 
 const FooterContainer = styled.footer`
@@ -22,24 +24,22 @@ const FooterButton = styled.div`
 
 export default function CalendarFooter () {
 
-  const weekHelper = useWeekHelper();
+  const currentDay = useSelector((state: { day: null | SelectedDay, week: Date[] }) => state.day);
 
-  const [selectedDay, setSelectedDay] = useState(weekHelper.getDay());
-
-  useEffect(() => weekHelper.subscribeDay(setSelectedDay), []);
+  const dispatcher = useDispatch();
 
   const setToday = () => {
-    weekHelper.setWeek(new Date());
+    dispatcher(currentWeek());
   }
 
   const deleteDay = () => {
-    if (selectedDay) {
-      localStorage.removeItem(JSON.stringify({time: selectedDay.time, date: selectedDay.day.toDateString()}));
-      weekHelper.setWeek(weekHelper.getWeekStart());
+    if (currentDay) {
+      localStorage.removeItem(JSON.stringify({time: currentDay.time, date: currentDay.day.toDateString()}));
+      dispatcher(setDay(null));
     }
   }
 
-  const getDeleteButton = useMemo(() => (selectedDay && haveDateEvent({time: selectedDay.time, date: selectedDay.day.toDateString()}))?<FooterButton onClick={deleteDay}>Delete</FooterButton>:null, [selectedDay]);
+  const getDeleteButton = useMemo(() => (currentDay && haveDateEvent({time: currentDay.time, date: currentDay.day.toDateString()}))?<FooterButton onClick={deleteDay}>Delete</FooterButton>:null, [currentDay]);
 
   return(
     <FooterContainer>
